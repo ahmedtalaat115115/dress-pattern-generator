@@ -1,21 +1,19 @@
 import 'measurement.dart';
 
 enum DressType {
-  abaya, // عباية
-  simpleDress, // فستان بسيط
-  topAndSkirt, // توب وتنورة
-  layeredDress, // فستان متعدد الطبقات
-  traditionalDress, // فستان تقليدي
+  abaya,
+  simpleDress,
+  topAndSkirt,
+  layeredDress,
+  traditionalDress,
 }
 
 class Pattern {
   final String id;
-  final String name; // اسم الباترون
+  final String name;
   final DressType type;
   final Measurements measurements;
   final DateTime createdAt;
-  final DateTime lastModified;
-  final String notes; // ملاحظات
 
   Pattern({
     required this.id,
@@ -23,125 +21,101 @@ class Pattern {
     required this.type,
     required this.measurements,
     required this.createdAt,
-    required this.lastModified,
-    this.notes = '',
   });
 
-  factory Pattern.fromJson(Map<String, dynamic> json) {
-    return Pattern(
-      id: json['id'] as String,
-      name: json['name'] as String,
-      type: DressType.values[json['type'] as int],
-      measurements: Measurements.fromJson(json['measurements'] as Map<String, dynamic>),
-      createdAt: DateTime.parse(json['createdAt'] as String),
-      lastModified: DateTime.parse(json['lastModified'] as String),
-      notes: json['notes'] as String? ?? '',
-    );
-  }
-
-  Map<String, dynamic> toJson() {
+  Map<String, dynamic> toMap() {
     return {
       'id': id,
       'name': name,
-      'type': type.index,
-      'measurements': measurements.toJson(),
+      'type': type.toString(),
+      'measurements': measurements.toMap(),
       'createdAt': createdAt.toIso8601String(),
-      'lastModified': lastModified.toIso8601String(),
-      'notes': notes,
     };
   }
 
-  Pattern copyWith({
-    String? id,
-    String? name,
-    DressType? type,
-    Measurements? measurements,
-    DateTime? createdAt,
-    DateTime? lastModified,
-    String? notes,
-  }) {
+  factory Pattern.fromMap(Map<String, dynamic> map) {
     return Pattern(
-      id: id ?? this.id,
-      name: name ?? this.name,
-      type: type ?? this.type,
-      measurements: measurements ?? this.measurements,
-      createdAt: createdAt ?? this.createdAt,
-      lastModified: lastModified ?? this.lastModified,
-      notes: notes ?? this.notes,
+      id: map['id'] ?? '',
+      name: map['name'] ?? '',
+      type: DressType.values.firstWhere(
+        (type) => type.toString() == map['type'],
+        orElse: () => DressType.simpleDress,
+      ),
+      measurements: Measurements.fromMap(map['measurements'] ?? {}),
+      createdAt: DateTime.parse(map['createdAt'] ?? DateTime.now().toIso8601String()),
     );
   }
 }
 
 class PatternTemplate {
   final String id;
-  final String name; // اسم القالب
+  final String name;
+  final String description;
   final DressType type;
-  final Map<String, double> defaultMeasurements; // المقاسات الافتراضية
-  final String description; // وصف القالب
+  final Map<String, double> defaultMeasurements;
 
   PatternTemplate({
     required this.id,
     required this.name,
+    required this.description,
     required this.type,
     required this.defaultMeasurements,
-    this.description = '',
   });
 }
 
-// قوالب جاهزة
 final List<PatternTemplate> predefinedTemplates = [
   PatternTemplate(
-    id: 'abaya_simple',
-    name: 'عباية بسيطة',
+    id: 'abaya',
+    name: 'عباية',
+    description: 'عباية تقليدية',
     type: DressType.abaya,
-    description: 'عباية بسيطة وكلاسيكية',
     defaultMeasurements: {
-      'height': 155,
-      'chestCircumference': 100,
-      'waistCircumference': 90,
-      'hipCircumference': 105,
-      'shoulderWidth': 38,
-      'armLength': 58,
-      'neckCircumference': 36,
+      'height': 150,
+      'chestCircumference': 90,
+      'waistCircumference': 75,
+      'hipCircumference': 100,
+      'shoulderWidth': 40,
+      'armLength': 60,
+      'neckCircumference': 35,
       'chestDepth': 20,
       'backWidth': 35,
-      'sleeveLength': 60,
+      'sleeveLength': 58,
     },
   ),
   PatternTemplate(
-    id: 'dress_simple',
+    id: 'simple_dress',
     name: 'فستان بسيط',
+    description: 'فستان كاجوال',
     type: DressType.simpleDress,
-    description: 'فستان بسيط ومريح',
     defaultMeasurements: {
       'height': 160,
-      'chestCircumference': 95,
-      'waistCircumference': 75,
-      'hipCircumference': 100,
-      'shoulderWidth': 36,
-      'armLength': 56,
-      'neckCircumference': 34,
-      'chestDepth': 22,
+      'chestCircumference': 85,
+      'waistCircumference': 70,
+      'hipCircumference': 95,
+      'shoulderWidth': 38,
+      'armLength': 55,
+      'neckCircumference': 33,
+      'chestDepth': 18,
       'backWidth': 33,
-      'sleeveLength': 58,
+      'sleeveLength': 50,
     },
   ),
   PatternTemplate(
     id: 'top_skirt',
     name: 'توب وتنورة',
+    description: 'توب مع تنورة',
     type: DressType.topAndSkirt,
-    description: 'توب وتنورة منفصلة',
     defaultMeasurements: {
-      'height': 160,
-      'chestCircumference': 92,
-      'waistCircumference': 72,
-      'hipCircumference': 98,
-      'shoulderWidth': 35,
-      'armLength': 55,
-      'neckCircumference': 33,
-      'chestDepth': 21,
+      'height': 165,
+      'chestCircumference': 80,
+      'waistCircumference': 65,
+      'hipCircumference': 90,
+      'shoulderWidth': 36,
+      'armLength': 52,
+      'neckCircumference': 32,
+      'chestDepth': 16,
       'backWidth': 32,
-      'sleeveLength': 57,
+      'sleeveLength': 45,
     },
   ),
 ];

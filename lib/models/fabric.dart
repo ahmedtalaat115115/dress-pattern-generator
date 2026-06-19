@@ -1,87 +1,84 @@
-class FabricType {
-  final String id;
-  final String name; // اسم النسيج
-  final String arabicName;
-  final double width; // عرض القماش (سم)
-  final double wasteFactor; // نسبة الهدر (النسبة المئوية)
+enum FabricType {
+  cotton,
+  linen,
+  silk,
+  chiffon,
+  jersey,
+}
 
-  FabricType({
-    required this.id,
-    required this.name,
+class Fabric {
+  final FabricType type;
+  final String arabicName;
+  final double width; // in cm
+  final double wasteFactor; // percentage
+
+  Fabric({
+    required this.type,
     required this.arabicName,
     required this.width,
-    this.wasteFactor = 15, // 15% بشكل افتراضي
+    required this.wasteFactor,
   });
 }
 
-// أنواع النسيج الشائعة
 final List<FabricType> commonFabrics = [
-  FabricType(
-    id: 'cotton',
-    name: 'Cotton',
-    arabicName: 'قطن',
+  FabricType.cotton,
+  FabricType.linen,
+  FabricType.silk,
+  FabricType.chiffon,
+  FabricType.jersey,
+];
+
+final Map<FabricType, Fabric> fabricDetails = {
+  FabricType.cotton: Fabric(
+    type: FabricType.cotton,
+    arabicName: 'القطن',
     width: 150,
     wasteFactor: 15,
   ),
-  FabricType(
-    id: 'linen',
-    name: 'Linen',
-    arabicName: 'كتان',
-    width: 150,
-    wasteFactor: 15,
+  FabricType.linen: Fabric(
+    type: FabricType.linen,
+    arabicName: 'الكتان',
+    width: 140,
+    wasteFactor: 18,
   ),
-  FabricType(
-    id: 'silk',
-    name: 'Silk',
-    arabicName: 'حرير',
+  FabricType.silk: Fabric(
+    type: FabricType.silk,
+    arabicName: 'الحرير',
     width: 140,
     wasteFactor: 20,
   ),
-  FabricType(
-    id: 'chiffon',
-    name: 'Chiffon',
-    arabicName: 'شيفون',
-    width: 150,
+  FabricType.chiffon: Fabric(
+    type: FabricType.chiffon,
+    arabicName: 'الشيفون',
+    width: 140,
     wasteFactor: 25,
   ),
-  FabricType(
-    id: 'jersey',
-    name: 'Jersey',
-    arabicName: 'جيرسيه',
+  FabricType.jersey: Fabric(
+    type: FabricType.jersey,
+    arabicName: 'الجيرسيه',
     width: 160,
-    wasteFactor: 10,
+    wasteFactor: 12,
   ),
-];
+};
 
 class FabricCalculation {
-  final double patternArea; // مساحة الباترون بالسم²
-  final double fabricWidth; // عرض القماش بالسم
-  final double wasteFactor; // نسبة الهدر
-  final double fabricLength; // طول القماش المطلوب بالسم
+  final double patternArea; // in cm²
+  final double fabricWidth; // in cm
+  final double wasteFactor; // percentage
 
   FabricCalculation({
     required this.patternArea,
     required this.fabricWidth,
     required this.wasteFactor,
-  }) : fabricLength = _calculateFabricLength(patternArea, fabricWidth, wasteFactor);
+  });
 
-  static double _calculateFabricLength(
-    double patternArea,
-    double fabricWidth,
-    double wasteFactor,
-  ) {
-    // احسب الطول الأساسي
-    double baseLength = patternArea / fabricWidth;
-    // أضف نسبة الهدر
-    double totalLength = baseLength * (1 + (wasteFactor / 100));
-    return totalLength;
+  double getFabricLengthInCm() {
+    final baseLength = patternArea / fabricWidth;
+    final wasteLength = baseLength * (wasteFactor / 100);
+    return baseLength + wasteLength;
   }
 
   double getFabricLengthInMeters() {
-    return fabricLength / 100;
-  }
-
-  double getFabricLengthInYards() {
-    return (fabricLength / 100) * 1.09361; // التحويل من متر إلى yard
+    return getFabricLengthInCm() / 100;
   }
 }

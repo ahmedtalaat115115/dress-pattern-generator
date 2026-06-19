@@ -1,24 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/pattern_provider.dart';
-import 'patterns_list_screen.dart';
 import 'new_pattern_screen.dart';
+import 'patterns_list_screen.dart';
 
-class HomeScreen extends StatefulWidget {
+class HomeScreen extends StatelessWidget {
   const HomeScreen({Key? key}) : super(key: key);
-
-  @override
-  State<HomeScreen> createState() => _HomeScreenState();
-}
-
-class _HomeScreenState extends State<HomeScreen> {
-  @override
-  void initState() {
-    super.initState();
-    Future.microtask(() {
-      context.read<PatternProvider>().initializeDatabase();
-    });
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -29,118 +16,198 @@ class _HomeScreenState extends State<HomeScreen> {
         elevation: 0,
       ),
       body: SingleChildScrollView(
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
+        child: Column(
+          children: [
+            // Header Image
+            Container(
+              width: double.infinity,
+              height: 200,
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: [Colors.purple.shade400, Colors.purple.shade700],
+                ),
+              ),
+              child: Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const Icon(
+                      Icons.checkroom,
+                      size: 64,
+                      color: Colors.white,
+                    ),
+                    const SizedBox(height: 12),
+                    Text(
+                      'صمّم باترونك الخاص',
+                      style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    const Text(
+                      'تطبيق احترافي لتصميم الباترونات',
+                      style: TextStyle(
+                        color: Colors.white70,
+                        fontSize: 14,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            const SizedBox(height: 24),
+            // Menu Buttons
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              child: Column(
+                children: [
+                  // New Pattern Button
+                  _buildMenuButton(
+                    context,
+                    icon: Icons.add_circle_outline,
+                    title: 'باترون جديد',
+                    subtitle: 'ابدأ بإنشاء باترون جديد',
+                    color: Colors.purple,
+                    onTap: () {
+                      Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (context) => const NewPatternScreen(),
+                        ),
+                      );
+                    },
+                  ),
+                  const SizedBox(height: 12),
+                  // Saved Patterns Button
+                  Consumer<PatternProvider>(
+                    builder: (context, provider, _) {
+                      return _buildMenuButton(
+                        context,
+                        icon: Icons.folder_open,
+                        title: 'الباترونات المحفوظة',
+                        subtitle: 'عدد الباترونات: ${provider.patterns.length}',
+                        color: Colors.deepOrange,
+                        onTap: () {
+                          Navigator.of(context).push(
+                            MaterialPageRoute(
+                              builder: (context) => const PatternsListScreen(),
+                            ),
+                          );
+                        },
+                      );
+                    },
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 32),
+            // Features Section
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'المميزات الرئيسية',
+                    style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  _buildFeature(
+                    icon: Icons.straighten,
+                    title: 'مقاسات شاملة',
+                    description: 'أدخل جميع المقاسات اللازمة بسهولة',
+                  ),
+                  const SizedBox(height: 12),
+                  _buildFeature(
+                    icon: Icons.palette,
+                    title: 'قوالب جاهزة',
+                    description: 'استخدم قوالب محضرة مسبقاً',
+                  ),
+                  const SizedBox(height: 12),
+                  _buildFeature(
+                    icon: Icons.picture_as_pdf,
+                    title: 'تصدير PDF',
+                    description: 'اطبع باترونك مباشرة',
+                  ),
+                  const SizedBox(height: 12),
+                  _buildFeature(
+                    icon: Icons.fabric,
+                    title: 'حساب الخامة',
+                    description: 'احسب كمية النسيج المطلوبة',
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 32),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildMenuButton(
+    BuildContext context, {
+    required IconData icon,
+    required String title,
+    required String subtitle,
+    required Color color,
+    required VoidCallback onTap,
+  }) {
+    return Material(
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(12),
+        child: Container(
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            border: Border.all(
+              color: color.withOpacity(0.3),
+              width: 2,
+            ),
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: Row(
             children: [
-              // البطاقة الرئيسية
-              Card(
-                elevation: 4,
-                shape: RoundedRectangleBorder(
+              Container(
+                width: 56,
+                height: 56,
+                decoration: BoxDecoration(
+                  color: color.withOpacity(0.1),
                   borderRadius: BorderRadius.circular(12),
                 ),
-                child: Padding(
-                  padding: const EdgeInsets.all(20.0),
-                  child: Column(
-                    children: [
-                      const Icon(
-                        Icons.design_services,
-                        size: 64,
-                        color: Colors.purple,
-                      ),
-                      const SizedBox(height: 16),
-                      const Text(
-                        'أنشئ باترونات احترافية',
-                        style: TextStyle(
-                          fontSize: 24,
-                          fontWeight: FontWeight.bold,
-                        ),
-                        textAlign: TextAlign.center,
-                      ),
-                      const SizedBox(height: 8),
-                      Text(
-                        'صمم باترونات الفساتين بمقاسات مخصصة واطبعها بسهولة',
-                        style: TextStyle(
-                          fontSize: 14,
-                          color: Colors.grey[600],
-                        ),
-                        textAlign: TextAlign.center,
-                      ),
-                    ],
-                  ),
+                child: Icon(
+                  icon,
+                  color: color,
+                  size: 28,
                 ),
               ),
-              const SizedBox(height: 24),
-              // الأزرار الرئيسية
-              ElevatedButton.icon(
-                onPressed: () {
-                  Navigator.of(context).push(
-                    MaterialPageRoute(
-                      builder: (context) => const NewPatternScreen(),
+              const SizedBox(width: 16),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      title,
+                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
-                  );
-                },
-                icon: const Icon(Icons.add),
-                label: const Text('إنشاء باترون جديد'),
-                style: ElevatedButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                ),
-              ),
-              const SizedBox(height: 12),
-              ElevatedButton.icon(
-                onPressed: () {
-                  Navigator.of(context).push(
-                    MaterialPageRoute(
-                      builder: (context) => const PatternsListScreen(),
+                    const SizedBox(height: 4),
+                    Text(
+                      subtitle,
+                      style: Theme.of(context).textTheme.bodySmall,
                     ),
-                  );
-                },
-                icon: const Icon(Icons.list),
-                label: const Text('الباترونات المحفوظة'),
-                style: ElevatedButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  backgroundColor: Colors.deepPurple,
+                  ],
                 ),
               ),
-              const SizedBox(height: 32),
-              // الميزات
-              Text(
-                'الميزات الرئيسية',
-                style: Theme.of(context).textTheme.titleLarge,
-                textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: 16),
-              _buildFeatureItem(
-                icon: Icons.straighten,
-                title: 'مقاسات شاملة',
-                description: 'أدخل جميع المقاسات اللازمة',
-              ),
-              _buildFeatureItem(
-                icon: Icons.picture_as_pdf,
-                title: 'طباعة احترافية',
-                description: 'اطبع الباترونات بصيغة PDF',
-              ),
-              _buildFeatureItem(
-                icon: Icons.save,
-                title: 'حفظ وتحميل',
-                description: 'احفظ باترونك للاستخدام لاحقاً',
-              ),
-              _buildFeatureItem(
-                icon: Icons.fabric,
-                title: 'حساب الخامة',
-                description: 'احسب كمية النسيج المطلوبة',
-              ),
-              _buildFeatureItem(
-                icon: Icons.dashboard_customize,
-                title: 'قوالب جاهزة',
-                description: 'استخدم قوالب محضرة مسبقاً',
+              Icon(
+                Icons.arrow_forward_ios,
+                color: color,
+                size: 20,
               ),
             ],
           ),
@@ -149,40 +216,50 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  Widget _buildFeatureItem({
+  Widget _buildFeature({
     required IconData icon,
     required String title,
     required String description,
   }) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 12.0),
-      child: Row(
-        children: [
-          Icon(icon, color: Colors.purple, size: 28),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  title,
-                  style: const TextStyle(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 14,
-                  ),
-                ),
-                Text(
-                  description,
-                  style: TextStyle(
-                    fontSize: 12,
-                    color: Colors.grey[600],
-                  ),
-                ),
-              ],
-            ),
+    return Row(
+      children: [
+        Container(
+          width: 48,
+          height: 48,
+          decoration: BoxDecoration(
+            color: Colors.purple.withOpacity(0.1),
+            borderRadius: BorderRadius.circular(8),
           ),
-        ],
-      ),
+          child: Icon(
+            icon,
+            color: Colors.purple,
+            size: 24,
+          ),
+        ),
+        const SizedBox(width: 12),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                title,
+                style: const TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 14,
+                ),
+              ),
+              const SizedBox(height: 2),
+              Text(
+                description,
+                style: const TextStyle(
+                  fontSize: 12,
+                  color: Colors.grey,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
     );
   }
 }

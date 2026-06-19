@@ -5,117 +5,64 @@ import '../models/measurement.dart';
 import '../services/database_service.dart';
 
 class PatternProvider extends ChangeNotifier {
-  final DatabaseService _databaseService = DatabaseService();
-  
   List<Pattern> _patterns = [];
-  Pattern? _currentPattern;
-  Measurements? _currentMeasurements;
+  final DatabaseService _dbService = DatabaseService();
 
   List<Pattern> get patterns => _patterns;
-  Pattern? get currentPattern => _currentPattern;
-  Measurements? get currentMeasurements => _currentMeasurements;
 
-  Future<void> initializeDatabase() async {
-    await _databaseService.initDatabase();
-    await loadPatterns();
+  PatternProvider() {
+    _loadPatterns();
   }
 
-  // تحميل جميع الباترونات
-  Future<void> loadPatterns() async {
-    _patterns = await _databaseService.getAllPatterns();
-    notifyListeners();
+  Future<void> _loadPatterns() async {
+    try {
+      _patterns = await _dbService.getAllPatterns();
+      notifyListeners();
+    } catch (e) {
+      print('Error loading patterns: $e');
+    }
   }
 
-  // إنشاء باترون جديد
   Future<void> createPattern({
     required String name,
     required DressType type,
     required Measurements measurements,
-    String notes = '',
   }) async {
-    final pattern = Pattern(
-      id: const Uuid().v4(),
-      name: name,
-      type: type,
-      measurements: measurements,
-      createdAt: DateTime.now(),
-      lastModified: DateTime.now(),
-      notes: notes,
-    );
+    try {
+      final pattern = Pattern(
+        id: const Uuid().v4(),
+        name: name,
+        type: type,
+        measurements: measurements,
+        createdAt: DateTime.now(),
+      );
 
-    await _databaseService.insertPattern(pattern);
-    _currentPattern = pattern;
-    _currentMeasurements = measurements;
-    await loadPatterns();
-  }
-
-  // تحديث باترون موجود
-  Future<void> updatePattern(Pattern pattern) async {
-    final updatedPattern = pattern.copyWith(
-      lastModified: DateTime.now(),
-    );
-    await _databaseService.updatePattern(updatedPattern);
-    _currentPattern = updatedPattern;
-    await loadPatterns();
-  }
-
-  // حذف باترون
-  Future<void> deletePattern(String patternId) async {
-    await _databaseService.deletePattern(patternId);
-    if (_currentPattern?.id == patternId) {
-      _currentPattern = null;
-      _currentMeasurements = null;
+      await _dbService.createPattern(pattern);
+      _patterns.add(pattern);
+      notifyListeners();
+    } catch (e) {
+      print('Error creating pattern: $e');
     }
-    await loadPatterns();
   }
 
-  // تحميل باترون معين
-  Future<void> loadPattern(String patternId) async {
-    _currentPattern = await _databaseService.getPattern(patternId);
-    _currentMeasurements = _currentPattern?.measurements;
-    notifyListeners();
+  Future<void> deletePattern(String id) async {
+    try {
+      await _dbService.deletePattern(id);
+      _patterns.removeWhere((pattern) => pattern.id == id);
+      notifyListeners();
+    } catch (e) {
+      print('Error deleting pattern: $e');
+    }
   }
 
-  // إنشاء باترون من قالب
-  Future<void> createPatternFromTemplate({
-    required String name,
-    required PatternTemplate template,
-    String notes = '',
-  }) async {
-    final measurements = Measurements(values: template.defaultMeasurements);
-    await createPattern(
-      name: name,
-      type: template.type,
-      measurements: measurements,
-      notes: notes,
-    );
-  }
-
-  // تحديث المقاسات للباترون الحالي
-  void updateCurrentMeasurements(Map<String, double> values) {
-    _currentMeasurements = Measurements(values: values);
-    notifyListeners();
-  }
-
-  // الحصول على اسم نوع الفستان
   String getDressTypeName(DressType type) {
-    switch (type) {
-      case DressType.abaya:
-        return 'عباية';
-      case DressType.simpleDress:
-        return 'فستان بسيط';
-      case DressType.topAndSkirt:
-        return 'توب وتنورة';
-      case DressType.layeredDress:
-        return 'فستان متعدد الطبقات';
-      case DressType.traditionalDress:
-        return 'فستان تقليدي';
-    }
-  }
-
-  @override
-  void dispose() {
-    _databaseService.closeDatabase();
-    super.dispose();
+    const names = {
+      DressType.abaya: 'عباية',
+      DressType.simpleDress: 'فستان بسيط',
+      DressType.topAndSkirt: 'توب وتنورة',
+      DressType.layeredDress: 'فستان متعدد الطبقات',
+      DressType.traditionalDress: 'فستان تقليدي',
+    };
+    return names[type] ?? 'فستان';
   }
 }
